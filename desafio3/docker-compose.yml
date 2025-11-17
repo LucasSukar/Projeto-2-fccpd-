@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  web:
+    build: ./web
+    container_name: web_desafio3
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - cache
+    networks:
+      - internal
+  db:
+    image: postgres:15
+    container_name: db_desafio3
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: teste_desafio3
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  cache:
+    image: redis:alpine
+    container_name: cache_desafio3
+    networks:
+      - internal
+volumes:
+  pgdata:
+networks:
+  internal:
