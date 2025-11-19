@@ -30,7 +30,7 @@ Três serviços distintos rodando simultaneamente:
 * **Orders**: Retorna IDs de pedidos e bens (carro, moto).
 
 ### 4. `run.sh`
-* Um script mais robusto com `case`. Aceita argumentos:
+* Um script que pode Aceitar argumentos:
     * `./run.sh` (sem nada): Inicia os containers (`up -d`).
     * `./run.sh stop`: Para e remove containers e volumes (`down -v`).
 
