@@ -7,20 +7,18 @@ Criar dois containers Docker que se comunicam usando uma **rede personalizada**.
 
 ---
 
-## Descrição Geral
-O projeto possui dois serviços:
+## Como funciona
+O projeto possui dois serviços conectados na mesma rede Docker:
 
 ### Servidor Web (`web/`)
-- Desenvolvido em **Python + Flask**.
-- Responde na rota `/` com: status, hostname e horário.
-- Roda na porta interna **8080**.
+- Responde na rota `/` com status, hostname e horário.
+- Executa na porta interna **8080**.
 
 ### Cliente (`client/`)
-- Baseado em **Alpine Linux**.
 - Executa um script (`client.sh`) que envia requisições contínuas ao servidor.
-- Exibe logs com as respostas recebidas.
+- Exibe no terminal os logs com as respostas.
 
-Ambos estão na mesma rede Docker criada pelo `docker-compose.yml`.
+A comunicação entre eles ocorre pela rede criada no `docker-compose.yml`, permitindo que o cliente acesse o servidor usando `http://web:8080`.
 
 ---
 
