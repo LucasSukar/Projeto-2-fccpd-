@@ -6,7 +6,7 @@ Ensinar o conceito de **Volumes** no Docker. O objetivo é mostrar que container
 ##  Descrição do Projeto
 Um banco de dados PostgreSQL que é inicializado automaticamente com uma tabela e dados. Um script de teste prova que, mesmo destruindo o banco, os dados inseridos anteriormente permanecem salvos.
 
-##  Estrutura de Arquivos Explicada
+##  Estrutura
 
 ### 1. `docker-compose.yml`
 * **Service `postgres`**: Usa a imagem oficial `postgres:15`.
@@ -28,7 +28,7 @@ Este script automatiza a prova de conceito:
 4.  Sobe o banco novamente.
 5.  Consulta os dados de novo para provar que "Lucas, Caio e Rodrigo" ainda estão lá.
 
-##  Funcionamento
+##  Como Fuciona
 O volume `pgdata` atua como um HD externo virtual plugado no container. Quando o container morre, o "HD" é desconectado, mas os dados ficam nele. Quando um novo container nasce, o "HD" é reconectado, restaurando o estado anterior.
 
 ##  Como Executar
