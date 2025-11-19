@@ -3,7 +3,7 @@
 ##Objetivo
 Demonstrar a comunicação básica de rede entre dois containers Docker. O objetivo é provar que containers na mesma rede personalizada podem se comunicar usando nomes de serviço (DNS interno) em vez de endereços IP.
 
-## 📄 Descrição do Projeto
+##Descrição do Projeto
 O sistema simula uma arquitetura simples de monitoramento:
 1.  **Servidor (Web)**: Uma API que fornece dados sobre seu próprio estado.
 2.  **Cliente**: Um "bot" que consulta essa API repetidamente para verificar se ela está online.
