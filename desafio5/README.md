@@ -1,55 +1,43 @@
-README – Desafio 5: Arquitetura com API Gateway e Microsserviços
-Descrição
+# Desafio 5: API Gateway Pattern
 
-Este projeto implementa uma arquitetura simples baseada em microsserviços, utilizando Docker e Docker Compose. O sistema é composto por dois serviços independentes (Users e Orders) e um API Gateway responsável por centralizar o acesso do cliente. O objetivo é demonstrar integração entre serviços, comunicação interna via Docker e organização da arquitetura.
+## Objetivo
+Implementar o padrão de projeto API Gateway. Em vez do cliente saber o endereço de cada microsserviço (Users, Orders), ele conhece apenas um endereço (Gateway), que roteia a chamada para o lugar certo.
 
-Arquitetura
+##  Descrição do Projeto
+Três serviços distintos rodando simultaneamente:
+1.  **Gateway**: porteiro. Recebe tudo na porta 8000.
+2.  **Service Users**: API interna de usuários.
+3.  **Service Orders**: API interna de pedidos.
 
-A arquitetura possui três componentes principais:
+## Estrutura de Arquivos Explicada
 
-Service Users – retorna uma lista de usuários.
+### 1. `docker-compose.yml`
+* Levanta 3 serviços.
+* **Gateway**: Exposto na porta **8000**.
+* **Service_users**: Exposto na 5001, apenas para debug, mas a comunicação real é interna.
+* **Service_orders**: Exposto na 5002, para debug.
 
-Service Orders – retorna uma lista de pedidos.
+### 2. Pasta `gateway/`
+* **`app.py`**:
+    * Configura as URLs constantes: `http://service_users:5000/users` e `http://service_orders:5000/orders`.
+    * Rota `/users`: O Gateway recebe, chama o serviço de usuários e devolve a resposta exata dele.
+    * Rota `/orders`: O Gateway recebe, chama o serviço de pedidos e devolve a resposta.
+* **`Dockerfile`**: Instala `flask` e `requests` para poder atuar como proxy reverso simples.
 
-API Gateway – ponto único de entrada. Recebe requisições e encaminha para o microsserviço correspondente.
+### 3. Pastas `service_users/` e `service_orders/`
+* Ambas contêm aplicações Flask simples que retornam dados estáticos JSON para serem consumidos pelo Gateway.
+* **Users**: Retorna IDs e Nomes.
+* **Orders**: Retorna IDs de pedidos e bens (carro, moto).
 
-O cliente acessa apenas o gateway. As chamadas aos serviços internos acontecem pela rede criada pelo Docker Compose.
+### 4. `run.sh`
+* Um script mais robusto com `case`. Aceita argumentos:
+    * `./run.sh` (sem nada): Inicia os containers (`up -d`).
+    * `./run.sh stop`: Para e remove containers e volumes (`down -v`).
 
-Funcionamento
+##  Funcionamento
+Isso simula um ambiente de produção real onde IPs e portas de serviços internos mudam ou são protegidos. O cliente só precisa decorar `localhost:8000`. O Gateway cuida de descobrir onde estão os dados dentro da rede Docker.
 
-O gateway expõe os endpoints /users e /orders.
-
-Ao acessar /users, o gateway consulta o serviço de usuários.
-
-Ao acessar /orders, o gateway consulta o serviço de pedidos.
-
-Os microsserviços retornam dados simples em JSON.
-
-Todos os serviços rodam isolados em containers separados.
-
-Como executar
-
-Para iniciar todos os serviços:
-
+##  Como Executar
+Iniciar o sistema:
+```bash
 ./run.sh
-
-
-Para parar e remover tudo:
-
-./run.sh stop
-
-Como verificar
-
-Após iniciar o sistema, é possível acessar pelo navegador ou Postman:
-
-Gateway: http://localhost:8000
-
-Usuários: http://localhost:8000/users
-
-Pedidos: http://localhost:8000/orders
-
-Os microsserviços também podem ser acessados diretamente nas portas 5001 e 5002, caso seja necessário.
-
-Conclusão
-
-O projeto demonstra o uso de microsserviços integrados através de um API Gateway, com comunicação interna gerenciada pelo Docker Compose. A arquitetura é simples, modular e adequada para aprendizado dos conceitos principais de microsserviços e orquestração com Docker.
