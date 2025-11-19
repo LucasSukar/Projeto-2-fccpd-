@@ -113,11 +113,9 @@ Dê permissão ao script:
 
 chmod +x run.sh
 
-
 Inicie os containers:
 
 ./run.sh
-
 
 O script sobe os serviços e exibe os logs.
 
@@ -199,7 +197,6 @@ Mostra novamente os dados, comprovando persistência.
 Permitir execução:
 
 chmod +x run.sh
-
 
 Executar:
 
@@ -297,7 +294,6 @@ Permitir permissão:
 
 chmod +x run.sh
 
-
 Rodar:
 
 ./run.sh
@@ -316,3 +312,5 @@ Teste do Redis
 http://localhost:5000/cache
 
 Cada rota retorna mensagens confirmando a comunicação interna entre os serviços.
+
+no inicio eu tentei formatar corretamente mas deu muito trabalho, me mandfe o aquivo compoleto sem mudar nada mas totalmente formatado
