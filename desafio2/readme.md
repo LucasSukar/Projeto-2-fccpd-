@@ -1,46 +1,38 @@
-# Desafio 2 — Comunicação entre Containers (Servidor + Cliente)
+# Desafio 2: Persistência de Dados (PostgreSQL + Volumes)
 
-## Descrição Geral
-Este projeto demonstra a comunicação entre dois containers Docker através de uma rede interna personalizada definida pelo `docker-compose.yml`.
+## Objetivo
+Ensinar o conceito de **Volumes** no Docker. O objetivo é mostrar que containers são efêmeros (perdem dados ao serem deletados), mas volumes são persistentes (mantêm dados independentemente do container).
 
-A arquitetura possui dois serviços principais:
+##  Descrição do Projeto
+Um banco de dados PostgreSQL que é inicializado automaticamente com uma tabela e dados. Um script de teste prova que, mesmo destruindo o banco, os dados inseridos anteriormente permanecem salvos.
 
-1. **Servidor Web** – Desenvolvido em Python + Flask.
-2. **Cliente** – Executa requisições periódicas ao servidor e exibe os resultados.
+##  Estrutura de Arquivos Explicada
 
-Ambos operam dentro da mesma rede Docker.
+### 1. `docker-compose.yml`
+* **Service `postgres`**: Usa a imagem oficial `postgres:15`.
+* **Environment**: Define as variáveis `POSTGRES_USER`, `PASSWORD` e `DB` para configurar o acesso automaticamente.
+* **Volumes**:
+    * `./init.sql:/docker-entrypoint-initdb.d/init.sql`: Mapeia o script local para a pasta especial do Postgres que executa scripts na inicialização.
+    * `pgdata:/var/lib/postgresql/data`: **O ponto crucial**. Mapeia a pasta de dados interna do banco para um volume nomeado gerenciado pelo Docker.
 
----
+### 2. `init.sql`
+* Este arquivo contém SQL puro.
+* Cria a tabela `usuarios` se ela não existir.
+* Insere três registros iniciais: 'Lucas Sukar', 'Caio Lima', e 'Rodrigo'.
 
-## Como Funciona
+### 3. `roda.sh` (Script de Teste)
+Este script automatiza a prova de conceito:
+1.  Sobe o banco (`docker-compose up`).
+2.  Consulta os dados atuais.
+3.  Destrói o container (`docker-compose down`). **Nota**: Isso apagaria os dados se não houvesse volumes.
+4.  Sobe o banco novamente.
+5.  Consulta os dados de novo para provar que "Lucas, Caio e Rodrigo" ainda estão lá.
 
-### Servidor Web (`web/`)
-- Responde na rota `/` exibindo:
-  - Status da aplicação  
-  - Hostname do container  
-  - Data e horário atual
-- Utiliza a porta interna **8080**.
+##  Funcionamento
+O volume `pgdata` atua como um HD externo virtual plugado no container. Quando o container morre, o "HD" é desconectado, mas os dados ficam nele. Quando um novo container nasce, o "HD" é reconectado, restaurando o estado anterior.
 
-### Cliente (`client/`)
-- Executa o script `client.sh` em loop.
-- Envia requisições contínuas para `http://web:8080`.
-- Mostra no terminal todas as respostas recebidas do servidor.
-
-A comunicação ocorre utilizando o nome do serviço definido no Compose, sem necessidade de IP.
-
----
-
-## Arquitetura
-O `docker-compose.yml` cria automaticamente uma rede interna onde:
-- O servidor fica disponível como `web`.
-- O cliente se conecta diretamente usando `http://web:8080`.
-
----
-
-## Passo a Passo para Executar
-
-### 1. Build e inicialização
-No diretório do projeto:
-
+##  Como Executar
+Execute o script de teste automatizado:
 ```bash
-docker-compose up --build
+chmod +x roda.sh
+./roda.sh
