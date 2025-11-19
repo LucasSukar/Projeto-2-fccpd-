@@ -1,80 +1,45 @@
-Este projeto foi feito para praticar o uso do Docker Compose, criando uma aplicação com três serviços que se comunicam entre si:
+# Desafio 3: Orquestração Completa (Web, DB, Cache)
 
-web → aplicação Flask
+## Objetivo
+Praticar a configuração de um ambiente Full Stack usando Docker Compose, gerenciando dependências de inicialização e conectividade entre três tecnologias diferentes: Python, Postgres e Redis.
 
-db → banco PostgreSQL
+##  Descrição do Projeto
+Uma aplicação web central que se conecta a dois serviços auxiliares:
+1.  **Banco de Dados**: Para persistência relacional.
+2.  **Cache**: Para armazenamento rápido em memória (chave-valor).
 
-cache → Redis para cache
+##  Estrutura dos Arquivos 
 
-A ideia é mostrar como orquestrar múltiplos containers usando uma rede interna e o depends_on.
+### 1. `docker-compose.yml`
+Configura a topologia da rede:
+* **Services**:
+    * `web`: A aplicação principal. Tem `depends_on: db, cache` para evitar erros de conexão na partida.
+    * `db`: PostgreSQL na versao 15 com volume persistente.
+    * `cache`: Redis.
+* **Networks**: Define a rede `internal` para isolar a comunicação desses serviços do mundo externo.
 
-Descrição dos serviços
-1. Web (Flask)
+### 2. Pasta `web/`
+* **`app.py`**:
+    * Rota `/db`: Usa a biblioteca `psycopg2` para conectar no host `db` (definido no compose) e autenticar com as credenciais do banco.
+    * Rota `/cache`: Usa a biblioteca `redis` para conectar no host `cache`, porta 6379. Grava uma chave de teste (`set("teste", "ok")`) para validar a escrita.
+* **`Dockerfile`**:
+    * Instala dependências de sistema e bibliotecas Python (`flask`, `psycopg2-binary`, `redis`) necessárias para conectar nos outros serviços.
 
-Roda um servidor Flask simples.
+### 3. `run.sh`
+* Automação para reiniciar o ambiente do zero. Executa `down` para limpar e `up -d --build` para garantir que alterações no código Python sejam refletidas na nova imagem.
 
-Tem rotas para testar comunicação com o banco e o Redis.
+##  Funcionamento
+Ao acessar a aplicação web, ela atua como um "proxy" de verificação. 
+Se você acessar `/db`, o Python vai até o container Postgres e volta. 
+Se acessar `/cache`, ele vai até o Redis e volta. 
+tudo Isso comprova que a rede interna do Docker está roteando o tráfego corretamente entre os containers.
 
-Porta exposta para acessar pelo navegador: 5000.
-
-2. Banco (PostgreSQL)
-
-Usa a imagem oficial do Postgres.
-
-Salva os dados em um volume para não perder nada quando o container for destruído.
-
-3. Cache (Redis)
-
-Usa Redis Alpine (imagem mais leve).
-
-Serve para testar comunicação com cache.
-
-Comunicação entre os serviços
-
-Todos os serviços estão na mesma rede interna chamada internal, então conseguem se comunicar pelos nomes:
-
-db → PostgreSQL
-
-cache → Redis
-
-web → Flask
-
-Exemplo dentro do Flask:
-
-host="db"
-
-Como rodar o projeto
-
-Antes de tudo, dê permissão ao script:
-
-chmod +x run.sh
-
-
-Agora execute:
-
-./run.sh
-
-
-O script faz três coisas:
-
-Derruba qualquer container antigo
-
-Sobe os serviços com build
-
-Mostra os logs
-
-Testando no navegador
-
-Com tudo rodando, abra:
-
-✔ Serviço web
-
-http://localhost:5000/
-
-✔ Teste do banco
-
-http://localhost:5000/db
-
-✔ Teste do Redis
-
-http://localhost:5000/cache
+##  Como Rodar
+1.  Inicie o ambiente:
+    ```bash
+    ./run.sh
+    ```
+2.  Teste no navegador:
+    * App: `http://localhost:5000/`
+    * Conexão DB: `http://localhost:5000/db`
+    * Conexão Redis: `http://localhost:5000/cache`
