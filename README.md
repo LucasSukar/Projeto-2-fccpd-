@@ -1,270 +1,310 @@
-DESAFIO 1 — Containers em Rede
-Objetivo
-
+DESAFIO 1
+#Objetivo
 Criar dois containers Docker que se comunicam entre si utilizando uma rede Docker personalizada.
-Um container atua como servidor web, enquanto o outro realiza requisições periódicas ao servidor.
+O primeiro container atua como servidor web e o segundo executa requisições periódicas ao servidor, exibindo os resultados no terminal.
+---
+#Descrição Geral
+Este projeto contém uma arquitetura simples composta por dois containers:
 
-Descrição Geral
-
-A arquitetura é composta por dois containers:
-
-1. Servidor Web (pasta web/)
-
-Desenvolvido com Python + Flask.
-
-Possui uma rota HTTP que retorna:
-
-hostname do container,
-
-horário atual,
-
-mensagem de status.
-
-Executado na porta 8080.
+##1. Servidor Web (pasta web/)
+   -Implementado em Python com Flask.
+   -Expõe uma rota HTTP que retorna informações do container, como hostname e horário atual.
+   -Executado na porta 8080 dentro do container.
 
 2. Cliente de Requisições (pasta client/)
 
-Baseado em Alpine Linux.
+Um container leve baseado em Alpine Linux.
 
-Executa um script que realiza requisições contínuas ao servidor.
+Executa um script shell que faz requisições contínuas para o servidor web.
 
-Mostra no terminal o resultado de cada requisição.
+Exibe logs a cada requisição, permitindo verificar a comunicação.
 
-Ambos utilizam uma rede Docker customizada, criada automaticamente pelo Docker Compose.
+Ambos os containers são conectados a uma rede Docker customizada criada pelo Docker Compose.
 
 Estrutura do Projeto
 docker-compose.yml
 
-Define:
+Este arquivo é o responsável por orquestrar os containers.
+Funções principais:
 
-a rede Docker personalizada,
+cria a rede Docker personalizada;
 
-o container web e o cliente,
+define os serviços web e client;
 
-dependência do cliente em relação ao servidor (depends_on),
+garante que o cliente só inicia após o servidor estar de pé (via depends_on);
 
-comunicação interna via DNS Docker (http://web:8080).
+coloca ambos na mesma rede, permitindo comunicação pelo nome do serviço.
+
+Pontos importantes:
+
+O servidor pode ser acessado internamente via http://web:8080.
+
+O cliente usa esse DNS interno automaticamente, sem necessidade de IP.
 
 Pasta web/ – Servidor Web
-
 app.py
 
-Rota principal retorna um JSON com:
+Aplicação Flask que responde com:
 
-confirmação de funcionamento,
+confirmação de que o servidor está funcionando;
 
-hostname,
+hostname do container;
 
-horário atual,
+horário atual formatado;
 
-status.
+mensagem de status.
+
+A rota principal / envia uma resposta em JSON.
 
 requirements.txt
 
-Lista de dependências (Flask).
+Lista contendo as dependências necessárias:
+
+Flask
 
 Dockerfile
 
-Base Python 3.10.
+Descreve como o container do servidor é montado:
 
-Instala dependências.
+usa Python 3.10 como base;
 
-Copia a aplicação.
+copia dependências;
 
-Executa python app.py.
+instala os pacotes da aplicação;
+
+copia o código do servidor;
+
+define o comando de inicialização: python app.py.
 
 Pasta client/ – Cliente Automatizado
-
 client.sh
 
-Script que:
+Script principal do container cliente:
 
-acessa http://web:8080/,
+define o endereço do servidor (http://web:8080/);
 
-imprime horário local,
+define um intervalo entre requisições;
 
-faz requisições usando curl,
+cria um loop infinito que:
 
-repete continuamente.
+obtém a hora atual;
+
+faz a requisição HTTP usando curl;
+
+imprime o resultado no terminal;
+
+espera alguns segundos e tenta novamente.
 
 Dockerfile
 
-Base Alpine Linux.
+Container do cliente:
 
-Instala curl.
+usa Alpine Linux;
 
-Copia e habilita o script.
+instala o pacote curl;
 
-Executa automaticamente o cliente.
+copia e habilita o script client.sh;
 
-Como Executar
+executa o script automaticamente.
+
+▶Como Executar
+
+Dê permissão ao script:
+
 chmod +x run.sh
+
+
+Inicie os containers:
+
 ./run.sh
+
+
+O script sobe os serviços e exibe os logs.
 
 Como Verificar
 
-Observe no terminal as requisições e respostas contendo hostname e horário do servidor.
+Observe no terminal as requisições feitas pelo cliente.
 
-A comunicação contínua confirma o funcionamento da rede interna.
+As respostas devem conter hostname e horário do servidor.
+
+Os logs comprovam a comunicação contínua entre containers.
+
+Ambos estão conectados na mesma rede Docker personalizada.
 
 DESAFIO 2 — Volumes e Persistência
 Objetivo
 
-Demonstrar persistência de dados usando volumes Docker com um banco PostgreSQL.
-Mesmo removendo o container, os dados permanecem armazenados.
+Demonstrar como a persistência de dados funciona utilizando volumes Docker em um banco PostgreSQL.
 
 Descrição Geral
 
-O projeto inclui:
+Este projeto monta um banco PostgreSQL dentro de um container, mas seus dados são gravados em um volume externo.
+Assim, ao remover o container, os dados continuam existindo.
 
-Banco PostgreSQL com volume persistente,
+O projeto também inclui:
 
-Arquivo init.sql para criar tabela e inserir dados iniciais,
+um arquivo init.sql que cria tabela e insere dados iniciais;
 
-Script que sobe o container duas vezes para demonstrar que os dados persistem.
+um script que sobe o container duas vezes para demonstrar a persistência.
 
 Estrutura do Projeto
 docker-compose.yml
 
 Responsável por:
 
-Criar o container PostgreSQL,
+criar o container PostgreSQL;
 
-Definir usuário, senha e nome do banco,
+configurar usuário, senha e nome do banco;
 
-Montar volume persistente,
+montar um volume onde os dados serão salvos;
 
-Montar init.sql para execução automática,
+montar o arquivo init.sql no local correto para execução automática;
 
-Expor porta de acesso.
+expor a porta para acesso externo.
 
 Pontos importantes:
 
-O volume mantém os dados entre execuções.
+O volume garante a persistência real dos dados.
 
-init.sql roda apenas na primeira inicialização.
+O arquivo init.sql só roda quando o volume está vazio.
 
 Arquivo init.sql
 
-Cria tabela usuarios,
+Script SQL que:
 
-Insere registros iniciais.
+cria a tabela usuarios;
 
-Executado somente quando o banco é criado pela primeira vez.
+insere registros iniciais (exemplo: nomes definidos por você).
+
+Este arquivo é executado automaticamente na primeira vez em que o banco é criado.
 
 Script run.sh
 
-Automatiza todo o teste de persistência:
+Automatiza todo o processo:
 
-Sobe o container,
+Sobe o container;
 
-Aguarda inicialização,
+Aguarda o banco inicializar;
 
-Exibe dados,
+Exibe os dados da tabela;
 
-Derruba container,
+Derruba o container (volume permanece);
 
-Sobe novamente,
+Sobe novamente o container;
 
-Exibe novamente (confirmando persistência).
+Mostra novamente os dados, comprovando persistência.
 
-Como Executar
+▶Como Executar
+
+Permitir execução:
+
 chmod +x run.sh
+
+
+Executar:
+
 ./run.sh
 
 Como Verificar
 
-Na primeira execução: dados vêm do init.sql.
+Na primeira execução, o script mostra os dados vindos do init.sql.
 
-Nas seguintes: mesmos dados são carregados do volume.
+Na segunda, os mesmos dados aparecem, provando que o volume mantém as informações mesmo após remover o container.
 
-Volume só é apagado com:
-
-docker-compose down -v
+O volume só é apagado manualmente com docker-compose down -v.
 
 DESAFIO 3 — Docker Compose Orquestrando Serviços
 Objetivo
 
-Criar uma aplicação com três serviços integrados:
-
-Web (Flask)
-
-Banco (PostgreSQL)
-
-Cache (Redis)
-
-Todos orquestrados via Docker Compose, com comunicação interna e dependências configuradas.
+Criar uma aplicação com três serviços (web, banco e cache), orquestrados via Docker Compose, demonstrando comunicação interna e dependências.
 
 Descrição Geral
 
-A aplicação é composta por:
+O projeto utiliza três containers que trabalham juntos:
 
 1. Web (Flask)
 
-Página inicial,
+Exibe página inicial;
 
-Rota para testar PostgreSQL,
+Possui rota para testar PostgreSQL;
 
-Rota para testar Redis.
+Possui rota para testar Redis.
 
 2. Banco (PostgreSQL)
 
-Armazena dados com persistência via volume.
+Armazena dados;
+
+Usa volume para persistência real.
 
 3. Cache (Redis)
 
-Fornece armazenamento rápido para testes.
+Fornece armazenamento rápido;
 
-Todos conectados à rede interna chamada internal.
+Usado para teste de comunicação e leitura/escrita.
+
+Todos estão conectados à mesma rede interna chamada internal.
 
 Componentes do Projeto
 docker-compose.yml
 
-Define:
+Coordena os três serviços:
 
-Variáveis de ambiente do PostgreSQL,
+define ambiente do PostgreSQL;
 
-Volume persistente,
+cria volume para dados;
 
-Rede interna,
+cria rede interna;
 
-Dependências (depends_on),
+define depends_on para ordem de inicialização;
 
-Comunicação interna via nomes dos containers:
+garante que os serviços se comunicam pelos nomes:
 
-web
+db para banco;
 
-db
+cache para Redis;
 
-cache
+web para aplicação.
 
 Pasta web/
 
-Aplicação Flask com rotas:
+Contém a aplicação Flask que:
 
-/ página inicial,
+responde na porta 5000;
 
-/db teste de conexão com PostgreSQL,
+possui rotas:
 
-/cache teste de conexão com Redis.
+/ → página inicial;
+
+/db → testa conexão com PostgreSQL;
+
+/cache → testa conexão com Redis.
 
 Script run.sh
 
-Remove containers antigos,
+Facilita a execução:
 
-Sobe todos os serviços,
+derruba containers antigos;
 
-Exibe logs iniciais,
+sobe todos os serviços novamente;
 
-Deixa tudo pronto para testes.
+mostra os logs iniciais;
 
-Como Executar
+deixa tudo pronto para testes no navegador.
+
+▶Como Executar
+
+Permitir permissão:
+
 chmod +x run.sh
+
+
+Rodar:
+
 ./run.sh
 
 Como Verificar
 
-Acesse no navegador:
+Acesse:
 
 Página inicial
 http://localhost:5000
@@ -275,4 +315,4 @@ http://localhost:5000/db
 Teste do Redis
 http://localhost:5000/cache
 
-As rotas retornam mensagens confirmando a comunicação entre os serviços.
+Cada rota retorna mensagens confirmando a comunicação interna entre os serviços.
