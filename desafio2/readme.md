@@ -1,7 +1,7 @@
 # Desafio 2: Persistência de Dados (PostgreSQL + Volumes)
 
 ## Objetivo
-Ensinar o conceito de Volumes no Docker. O objetivo é mostrar que containers perdem dados ao serem deletados, mas volumes mantêm dados independentemente do container.
+mostrar que containers perdem dados ao serem deletados, mas volumes mantêm dados independentemente do container.
 
 ##  Descrição do Projeto
 Um banco de dados PostgreSQL que é inicializado automaticamente com uma tabela e dados. Um script de teste prova que, mesmo destruindo o banco, os dados inseridos anteriormente permanecem salvos.
@@ -16,12 +16,12 @@ Um banco de dados PostgreSQL que é inicializado automaticamente com uma tabela 
     * `pgdata:/var/lib/postgresql/data`: Mapeia a pasta de dados interna do banco para um volume nomeado gerenciado pelo Docker.
 
 ### 2. `init.sql`
-* Este arquivo contém SQL puro.
+* Este arquivo tem so SQL puro.
 * Cria a tabela `usuarios` se ela não existir.
 * Insere três registros iniciais: 'Lucas Sukar', 'Caio Lima', e 'Rodrigo'.
 
 ### 3. `roda.sh` 
-Este script automatiza a prova de conceito:
+Este script automatiza:
 1.  Sobe o banco (`docker-compose up`).
 2.  Consulta os dados atuais.
 3.  Destrói o container (`docker-compose down`).  aqui apagaria os dados se não houvesse volumes.
