@@ -11,7 +11,6 @@ O sistema simula uma arquitetura simples de monitoramento:
 ## Estrutura de Arquivos Explicada
 
 ### 1. `docker-compose.yml`
-Este é o orquestrador do desafio.
 * **Services**: Define dois serviços, `web` e `client`.
 * **Build**: Indica que as imagens devem ser construídas localmente a partir das pastas `./web` e `./client`.
 * **Networks**: Cria uma rede chamada `challenge_net`. Ambos os serviços são conectados a ela, permitindo visibilidade mútua.
